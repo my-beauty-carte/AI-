@@ -2,6 +2,7 @@ import base64
 import tempfile
 from pathlib import Path
 
+import requests
 from openai import OpenAI
 from pptx import Presentation
 from pptx.oxml.ns import qn
@@ -45,9 +46,13 @@ def _generate_slide_image(title: str) -> bytes:
         prompt=IMAGE_PROMPT_TEMPLATE.format(title=title),
         size="1024x1024",
         n=1,
-        response_format="b64_json",
     )
-    return base64.b64decode(response.data[0].b64_json)
+    image_data = response.data[0]
+    # response_format(b64_json/url)を明示指定できないAPIバージョンでも動くよう、
+    # 実際に返ってきた方の形式(base64 or URL)を使う。
+    if image_data.b64_json:
+        return base64.b64decode(image_data.b64_json)
+    return requests.get(image_data.url, timeout=30).content
 
 
 def build(slides: list[dict], output_path: Path) -> None:
