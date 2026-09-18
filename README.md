@@ -34,6 +34,9 @@
   - `ffmpeg` / `ffprobe` / `ffplay`(録音・動画生成・再生に使用)
   - LibreOffice Impress(`soffice` + `libreoffice-impress`。core/commonだけではpptxの読み込みに失敗するため、Impressコンポーネントも必須)(スライド→PDF変換に使用)
   - `pdftoppm` (poppler-utils)(PDF→画像変換に使用)
+  - 日本語フォント「Noto Sans JP」(macOSの場合 `brew install --cask font-noto-sans-jp`。
+    macOS標準の「Hiragino Sans」はLibreOfficeのheadless実行では認識されず、日本語が
+    表示されないため、通常のフォントファイルとしてインストールされるNoto Sans JPを使う)
 - APIキー
   - `ANTHROPIC_API_KEY`(スライド構成生成)
   - `OPENAI_API_KEY`(文字起こし)

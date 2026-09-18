@@ -7,10 +7,15 @@ from pptx.text.text import _Run
 from pptx.util import Pt
 
 # デフォルトのpptxテーマは東アジア用フォントが未指定で、日本語用のフォールバックが
-# Windows専用の「ＭＳ Ｐゴシック」になっている。macOSにこのフォントは無いため、
-# LibreOfficeでPDF変換する際に日本語が表示されなくなる。実行環境を問わず表示できる
-# よう、各テキストに東アジア用フォントを明示的に指定する。
-JAPANESE_FONT = "Hiragino Sans"
+# Windows専用の「ＭＳ Ｐゴシック」になっている。実行環境を問わず表示できるよう、
+# 各テキストに東アジア用フォントを明示的に指定する。
+#
+# macOS標準の「Hiragino Sans」はシステム保護領域のフォントコンテナに格納されており、
+# LibreOfficeをheadless(バックグラウンド)モードで実行した際にはこれを見つけられず、
+# 日本語部分だけ表示されなくなることを確認した。通常のフォントファイルとして
+# インストールされる「Noto Sans JP」(`brew install --cask font-noto-sans-jp`)は
+# headlessモードでも問題なく認識されるため、こちらを使う。
+JAPANESE_FONT = "Noto Sans JP"
 
 
 def _set_japanese_font(run: _Run, font_name: str) -> None:
