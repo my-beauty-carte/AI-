@@ -41,6 +41,9 @@ def _build_segment(image_path: Path, audio_path: Path, duration: float, out_path
     subprocess.run(
         [
             "ffmpeg", "-y", "-loop", "1", "-i", str(image_path), "-i", str(audio_path),
+            # libx264は幅・高さが偶数でないとエンコードに失敗するため、
+            # pdftoppmの出力サイズに関わらず偶数に揃える。
+            "-vf", "scale=trunc(iw/2)*2:trunc(ih/2)*2",
             "-c:v", "libx264", "-tune", "stillimage", "-c:a", "aac",
             "-pix_fmt", "yuv420p", "-shortest", "-t", str(duration),
             str(out_path),
