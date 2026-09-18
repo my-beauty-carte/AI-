@@ -8,9 +8,11 @@ from openai import OpenAI
 
 from . import config
 
-# OpenAIの音声文字起こしAPIは1ファイル25MBまで。長いセミナー録音でも
-# 安全に収まるよう、10分単位に分割してから順に文字起こしする。
-CHUNK_SECONDS = 600
+# OpenAIの音声文字起こしAPIは1ファイル25MB(26,214,400バイト)まで。
+# record.pyの録音形式(44.1kHz・16bit・モノラルWAV)は約88,200バイト/秒なので、
+# 10分のチャンクだと約50MBになり上限を超えてしまう。安全に収まるよう、
+# 4分(約20MB)単位に分割する。
+CHUNK_SECONDS = 240
 
 
 def _split_audio(audio_path: Path, chunk_dir: Path) -> list[Path]:
