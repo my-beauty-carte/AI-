@@ -32,7 +32,7 @@
 - インターネット接続(Whisper APIとClaude APIの呼び出しに使用)
 - コマンドラインツール
   - `ffmpeg` / `ffprobe` / `ffplay`(録音・動画生成・再生に使用)
-  - LibreOffice (`soffice`)(スライド→PDF変換に使用)
+  - LibreOffice Impress(`soffice` + `libreoffice-impress`。core/commonだけではpptxの読み込みに失敗するため、Impressコンポーネントも必須)(スライド→PDF変換に使用)
   - `pdftoppm` (poppler-utils)(PDF→画像変換に使用)
 - APIキー
   - `ANTHROPIC_API_KEY`(スライド構成生成)
