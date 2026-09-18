@@ -27,4 +27,5 @@ MIN_SLIDE_SECONDS = float(os.environ.get("SEMINAR_MIN_SLIDE_SECONDS", "6"))
 AUDIO_INPUT_DEVICE = os.environ.get("SEMINAR_AUDIO_DEVICE")
 
 # ナレーション音声(OpenAI TTS)。alloy/echo/fable/onyx/nova/shimmerから選べる。
-NARRATION_VOICE = os.environ.get("SEMINAR_NARRATION_VOICE", "shimmer")
+# novaは明るく元気なトーン。落ち着いた声にしたい場合はshimmerやfableに変更できる。
+NARRATION_VOICE = os.environ.get("SEMINAR_NARRATION_VOICE", "nova")
