@@ -8,7 +8,7 @@ load_dotenv()
 ANTHROPIC_MODEL = "claude-opus-5"
 OPENAI_WHISPER_MODEL = "whisper-1"
 OPENAI_TTS_MODEL = "tts-1"
-OPENAI_IMAGE_MODEL = "dall-e-3"
+OPENAI_IMAGE_MODEL = "gpt-image-1"
 
 WORK_DIR = Path(os.environ.get("SEMINAR_WORK_DIR", "./seminar_output"))
 AUDIO_PATH = WORK_DIR / "recording.wav"
