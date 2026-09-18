@@ -27,7 +27,6 @@ def main() -> None:
     print("[4/4] 動画を生成中...")
     render_video.render(config.SLIDES_PATH, slides, config.VIDEO_PATH)
 
-    print("動画の準備ができました。再生します。")
     play_video.play(config.VIDEO_PATH)
 
 

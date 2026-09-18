@@ -7,7 +7,7 @@ load_dotenv()
 
 ANTHROPIC_MODEL = "claude-opus-5"
 OPENAI_WHISPER_MODEL = "whisper-1"
-OPENAI_TTS_MODEL = "tts-1"
+OPENAI_TTS_MODEL = "gpt-4o-mini-tts"
 OPENAI_IMAGE_MODEL = "gpt-image-1"
 
 WORK_DIR = Path(os.environ.get("SEMINAR_WORK_DIR", "./seminar_output"))
@@ -29,3 +29,9 @@ AUDIO_INPUT_DEVICE = os.environ.get("SEMINAR_AUDIO_DEVICE")
 # ナレーション音声(OpenAI TTS)。alloy/echo/fable/onyx/nova/shimmerから選べる。
 # novaは明るく元気なトーン。落ち着いた声にしたい場合はshimmerやfableに変更できる。
 NARRATION_VOICE = os.environ.get("SEMINAR_NARRATION_VOICE", "nova")
+
+# gpt-4o-mini-ttsは、この指示文で話し方(トーン)を調整できる。
+NARRATION_INSTRUCTIONS = os.environ.get(
+    "SEMINAR_NARRATION_INSTRUCTIONS",
+    "とても明るく元気に、笑顔が伝わるような弾んだトーンで話してください。",
+)

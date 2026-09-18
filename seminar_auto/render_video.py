@@ -33,6 +33,7 @@ def _narrate_slide(text: str, out_path: Path) -> float:
         model=config.OPENAI_TTS_MODEL,
         voice=config.NARRATION_VOICE,
         input=text,
+        instructions=config.NARRATION_INSTRUCTIONS,
     )
     out_path.write_bytes(response.content)
     probe = subprocess.run(
