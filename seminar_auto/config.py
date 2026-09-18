@@ -1,6 +1,10 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
+load_dotenv()
+
 ANTHROPIC_MODEL = "claude-opus-5"
 OPENAI_WHISPER_MODEL = "whisper-1"
 
