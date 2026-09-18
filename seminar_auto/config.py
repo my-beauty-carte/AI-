@@ -7,6 +7,8 @@ load_dotenv()
 
 ANTHROPIC_MODEL = "claude-opus-5"
 OPENAI_WHISPER_MODEL = "whisper-1"
+OPENAI_TTS_MODEL = "tts-1"
+OPENAI_IMAGE_MODEL = "dall-e-3"
 
 WORK_DIR = Path(os.environ.get("SEMINAR_WORK_DIR", "./seminar_output"))
 AUDIO_PATH = WORK_DIR / "recording.wav"
@@ -23,4 +25,6 @@ MIN_SLIDE_SECONDS = float(os.environ.get("SEMINAR_MIN_SLIDE_SECONDS", "6"))
 
 # 会場PCのマイク入力デバイス名。未指定ならOSごとの既定デバイスを使う。
 AUDIO_INPUT_DEVICE = os.environ.get("SEMINAR_AUDIO_DEVICE")
-NARRATION_LANG = os.environ.get("SEMINAR_NARRATION_LANG", "ja")
+
+# ナレーション音声(OpenAI TTS)。alloy/echo/fable/onyx/nova/shimmerから選べる。
+NARRATION_VOICE = os.environ.get("SEMINAR_NARRATION_VOICE", "shimmer")

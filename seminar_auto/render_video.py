@@ -3,7 +3,7 @@ import subprocess
 import tempfile
 from pathlib import Path
 
-from gtts import gTTS
+from openai import OpenAI
 
 from . import config
 
@@ -28,7 +28,13 @@ def _render_slide_images(pptx_path: Path, out_dir: Path) -> list[Path]:
 
 
 def _narrate_slide(text: str, out_path: Path) -> float:
-    gTTS(text=text, lang=config.NARRATION_LANG).save(str(out_path))
+    client = OpenAI()
+    response = client.audio.speech.create(
+        model=config.OPENAI_TTS_MODEL,
+        voice=config.NARRATION_VOICE,
+        input=text,
+    )
+    out_path.write_bytes(response.content)
     probe = subprocess.run(
         ["ffprobe", "-v", "error", "-show_entries", "format=duration",
          "-of", "default=noprint_wrappers=1:nokey=1", str(out_path)],

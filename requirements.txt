@@ -1,5 +1,4 @@
 anthropic
 openai
 python-pptx
-gTTS
 python-dotenv
