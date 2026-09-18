@@ -1,4 +1,5 @@
 import base64
+import concurrent.futures
 import tempfile
 from pathlib import Path
 
@@ -57,9 +58,13 @@ def _generate_slide_image(title: str) -> bytes:
 
 
 def build(slides: list[dict], output_path: Path) -> None:
+    # 画像生成はスライドごとに独立したAPI呼び出しなので並列に実行する。
+    with concurrent.futures.ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_REQUESTS) as executor:
+        images = list(executor.map(lambda s: _generate_slide_image(s["title"]), slides))
+
     prs = Presentation()
     layout = prs.slide_layouts[1]  # タイトル + 本文
-    for slide_data in slides:
+    for slide_data, image_bytes in zip(slides, images):
         slide = prs.slides.add_slide(layout)
         slide.shapes.title.text = slide_data["title"]
         for run in slide.shapes.title.text_frame.paragraphs[0].runs:
@@ -80,7 +85,6 @@ def build(slides: list[dict], output_path: Path) -> None:
             for run in paragraph.runs:
                 _set_japanese_font(run, JAPANESE_FONT)
 
-        image_bytes = _generate_slide_image(slide_data["title"])
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as f:
             f.write(image_bytes)
             image_path = Path(f.name)

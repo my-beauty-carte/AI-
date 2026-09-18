@@ -1,3 +1,4 @@
+import concurrent.futures
 import re
 import subprocess
 import tempfile
@@ -31,17 +32,22 @@ def _split_audio(audio_path: Path, chunk_dir: Path) -> list[Path]:
     return sorted(chunk_dir.glob("chunk_*.wav"), key=chunk_index)
 
 
+def _transcribe_chunk(client: OpenAI, chunk: Path) -> str:
+    with open(chunk, "rb") as f:
+        result = client.audio.transcriptions.create(
+            model=config.OPENAI_WHISPER_MODEL,
+            file=f,
+            language="ja",
+        )
+    return result.text
+
+
 def transcribe(audio_path: Path) -> str:
     client = OpenAI()
     with tempfile.TemporaryDirectory() as tmp:
         chunks = _split_audio(audio_path, Path(tmp))
-        texts = []
-        for chunk in chunks:
-            with open(chunk, "rb") as f:
-                result = client.audio.transcriptions.create(
-                    model=config.OPENAI_WHISPER_MODEL,
-                    file=f,
-                    language="ja",
-                )
-            texts.append(result.text)
+        # 90分クラスの長いセミナーでも休憩時間内に終わるよう、チャンクごとの
+        # 文字起こしを並列に実行する(順序はexecutor.mapが呼び出し順を保持する)。
+        with concurrent.futures.ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_REQUESTS) as executor:
+            texts = list(executor.map(lambda chunk: _transcribe_chunk(client, chunk), chunks))
     return "\n".join(texts)

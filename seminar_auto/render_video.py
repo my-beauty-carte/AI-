@@ -1,3 +1,4 @@
+import concurrent.futures
 import re
 import subprocess
 import tempfile
@@ -73,13 +74,26 @@ def render(pptx_path: Path, slides: list[dict], output_path: Path) -> None:
     with tempfile.TemporaryDirectory() as tmp:
         tmp_dir = Path(tmp)
         images = _render_slide_images(pptx_path, tmp_dir)
-        segments = []
-        for i, (image_path, slide_data) in enumerate(zip(images, slides)):
-            narration_text = slide_data["title"] + "。" + "。".join(slide_data["bullets"])
-            audio_path = tmp_dir / f"narration_{i:03d}.mp3"
-            narration_seconds = _narrate_slide(narration_text, audio_path)
-            duration = max(narration_seconds + 1.0, config.MIN_SLIDE_SECONDS)
 
+        narration_texts = [
+            slide_data["title"] + "。" + "。".join(slide_data["bullets"]) for slide_data in slides
+        ]
+        audio_paths = [tmp_dir / f"narration_{i:03d}.mp3" for i in range(len(slides))]
+
+        # ナレーション生成はスライドごとに独立したAPI呼び出しなので並列に実行する。
+        with concurrent.futures.ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_REQUESTS) as executor:
+            narration_seconds_list = list(
+                executor.map(
+                    lambda i: _narrate_slide(narration_texts[i], audio_paths[i]),
+                    range(len(slides)),
+                )
+            )
+
+        segments = []
+        for i, (image_path, audio_path, narration_seconds) in enumerate(
+            zip(images, audio_paths, narration_seconds_list)
+        ):
+            duration = max(narration_seconds + 1.0, config.MIN_SLIDE_SECONDS)
             segment_path = tmp_dir / f"segment_{i:03d}.mp4"
             _build_segment(image_path, audio_path, duration, segment_path)
             segments.append(segment_path)
