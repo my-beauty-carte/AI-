@@ -1,3 +1,4 @@
+import concurrent.futures
 import re
 import subprocess
 import tempfile
@@ -7,9 +8,11 @@ from openai import OpenAI
 
 from . import config
 
-# OpenAIの音声文字起こしAPIは1ファイル25MBまで。長いセミナー録音でも
-# 安全に収まるよう、10分単位に分割してから順に文字起こしする。
-CHUNK_SECONDS = 600
+# OpenAIの音声文字起こしAPIは1ファイル25MB(26,214,400バイト)まで。
+# record.pyの録音形式(44.1kHz・16bit・モノラルWAV)は約88,200バイト/秒なので、
+# 10分のチャンクだと約50MBになり上限を超えてしまう。安全に収まるよう、
+# 4分(約20MB)単位に分割する。
+CHUNK_SECONDS = 240
 
 
 def _split_audio(audio_path: Path, chunk_dir: Path) -> list[Path]:
@@ -31,17 +34,22 @@ def _split_audio(audio_path: Path, chunk_dir: Path) -> list[Path]:
     return sorted(chunk_dir.glob("chunk_*.wav"), key=chunk_index)
 
 
+def _transcribe_chunk(client: OpenAI, chunk: Path) -> str:
+    with open(chunk, "rb") as f:
+        result = client.audio.transcriptions.create(
+            model=config.OPENAI_WHISPER_MODEL,
+            file=f,
+            language="ja",
+        )
+    return result.text
+
+
 def transcribe(audio_path: Path) -> str:
     client = OpenAI()
     with tempfile.TemporaryDirectory() as tmp:
         chunks = _split_audio(audio_path, Path(tmp))
-        texts = []
-        for chunk in chunks:
-            with open(chunk, "rb") as f:
-                result = client.audio.transcriptions.create(
-                    model=config.OPENAI_WHISPER_MODEL,
-                    file=f,
-                    language="ja",
-                )
-            texts.append(result.text)
+        # 90分クラスの長いセミナーでも休憩時間内に終わるよう、チャンクごとの
+        # 文字起こしを並列に実行する(順序はexecutor.mapが呼び出し順を保持する)。
+        with concurrent.futures.ThreadPoolExecutor(max_workers=config.MAX_PARALLEL_REQUESTS) as executor:
+            texts = list(executor.map(lambda chunk: _transcribe_chunk(client, chunk), chunks))
     return "\n".join(texts)
